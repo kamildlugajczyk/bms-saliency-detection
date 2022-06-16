@@ -1,0 +1,4 @@
+PySimpleGuiQT~=0.35.0
+PySimpleGui
+Image
+Pillow
