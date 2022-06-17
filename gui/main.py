@@ -2,6 +2,7 @@ import io
 import PySimpleGUIQt as sg
 import os
 from PIL import Image
+from bms import bms
 
 file_types = (("JPG", "*.jpg"), ("PNG", "*.png"), ("BITMAP", "*.bmp"),)
 
@@ -15,6 +16,22 @@ layout = [
 
 window = sg.Window('Saliency detection using BMS', layout, size=(1080, 600))
 
+path = ""
+result_path = "../results/result.jpg"
+
+
+def get_image_data(path, max_size=(600, 400), save=False):
+    img = Image.open(path)
+    img.thumbnail(max_size)
+    if save:
+        img.save(result_path)
+
+    bio = io.BytesIO()
+    img.save(bio, format="PNG")
+    del img
+    return bio.getvalue()
+
+
 if __name__ == '__main__':
     while True:
         event, values = window.read()
@@ -24,14 +41,13 @@ if __name__ == '__main__':
         if event == "-FILE-":
             path = values["-FILE-"]
             if os.path.exists(path):
-                image = Image.open(path)
-                image.thumbnail((600, 600))
-                image_bytes = io.BytesIO()
-                image.save(image_bytes, format="PNG")
-                window["-IMAGE BEFORE-"].update(data=image_bytes.getvalue())
+                before = get_image_data(path, save=True)
+                window["-IMAGE BEFORE-"].update(data=before)
 
-        # if event == "Process image":
-          # invoke bms
-          # window["-IMAGE AFTER-"].update(data=<bytes>)
+        if event == "Process image":
+            if path != "":
+                bms.process(result_path)
+                after = get_image_data(result_path)
+                window["-IMAGE AFTER-"].update(data=after)
 
     window.close()
